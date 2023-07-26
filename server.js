@@ -16,10 +16,10 @@ function readDatabase() {
   try {
     const data = jsonfile.readFileSync(databasePath)
     // Convert counter values to numbers
-    data.vueCounter = parseInt(data.vueCounter) || 0
-    data.reactCounter = parseInt(data.reactCounter) || 0
-    data.angularCounter = parseInt(data.angularCounter) || 0
-    data.otherCounter = parseInt(data.otherCounter) || 0
+    data.vueCounter = Number(data.vueCounter) || 0
+    data.reactCounter = Number(data.reactCounter) || 0
+    data.angularCounter = Number(data.angularCounter) || 0
+    data.otherCounter = Number(data.otherCounter) || 0
     return data
   } catch (error) {
     console.error('Error reading database file:', error.message)
