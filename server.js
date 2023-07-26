@@ -76,6 +76,10 @@ app.get('/set-cookie', (req, res) => {
   res.send('Cookie set successfully!')
 })
 
+app.get('/', (req, res) => {
+  res.send('Hello from the root path!')
+})
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`)
