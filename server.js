@@ -14,7 +14,13 @@ app.use(express.json())
 // Function to read the database file
 function readDatabase() {
   try {
-    return jsonfile.readFileSync(databasePath)
+    const data = jsonfile.readFileSync(databasePath)
+    // Convert counter values to numbers
+    data.vueCounter = parseInt(data.vueCounter) || 0
+    data.reactCounter = parseInt(data.reactCounter) || 0
+    data.angularCounter = parseInt(data.angularCounter) || 0
+    data.otherCounter = parseInt(data.otherCounter) || 0
+    return data
   } catch (error) {
     console.error('Error reading database file:', error.message)
     return {}
@@ -95,11 +101,12 @@ app.get('/count/all', (req, res) => {
   getCounters(res)
 })
 
+// Root URL route
+app.get('/', (req, res) => {
+  res.send('Hello from Eric!')
+})
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`)
-})
-
-app.get('/', (req, res) => {
-  res.send('Hello from Eric!')
 })
