@@ -6,6 +6,22 @@ const app = express()
 const port = 3004
 const databasePath = './poll_data.json'
 
+// Function to initialize the database file with initial counter values
+function initializeDatabase() {
+  const initialData = {
+    vueCounter: 0,
+    reactCounter: 0,
+    angularCounter: 0,
+    otherCounter: 0
+  }
+  jsonfile.writeFileSync(databasePath, initialData)
+}
+
+// Initialize the database file if it doesn't exist
+if (!jsonfile.existsSync(databasePath)) {
+  initializeDatabase()
+}
+
 // Middleware to parse JSON bodies
 app.use(cookieParser())
 app.use(cors())
