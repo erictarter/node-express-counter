@@ -52,47 +52,39 @@ function updateCounter(counterName, newValue, res) {
 
 // Route for incrementing the counter
 app.get('/vuecounter/increment', (req, res) => {
-  const data = readDatabase()
-  updateCounter('vueCounter', (data.vueCounter || 0) + 1, res)
+  updateCounter('vueCounter', readDatabase().vueCounter + 1, res)
 })
 
 app.get('/reactcounter/increment', (req, res) => {
-  const data = readDatabase()
-  updateCounter('reactCounter', (data.reactCounter || 0) + 1, res)
+  updateCounter('reactCounter', readDatabase().reactCounter + 1, res)
 })
 
 app.get('/angularcounter/increment', (req, res) => {
-  const data = readDatabase()
-  updateCounter('angularCounter', (data.angularCounter || 0) + 1, res)
+  updateCounter('angularCounter', readDatabase().angularCounter + 1, res)
 })
 
 app.get('/othercounter/increment', (req, res) => {
-  const data = readDatabase()
-  updateCounter('otherCounter', (data.otherCounter || 0) + 1, res)
+  updateCounter('otherCounter', readDatabase().otherCounter + 1, res)
 })
 
 // Route for decrementing the counter
 app.get('/vuecounter/decrement', (req, res) => {
-  const data = readDatabase()
-  const newCounterValue = Math.max(0, (data.vueCounter || 0) - 1)
+  const newCounterValue = Math.max(0, readDatabase().vueCounter - 1)
   updateCounter('vueCounter', newCounterValue, res)
 })
 
 app.get('/reactcounter/decrement', (req, res) => {
-  const data = readDatabase()
-  const newCounterValue = Math.max(0, (data.reactCounter || 0) - 1)
+  const newCounterValue = Math.max(0, readDatabase().reactCounter - 1)
   updateCounter('reactCounter', newCounterValue, res)
 })
 
 app.get('/angularcounter/decrement', (req, res) => {
-  const data = readDatabase()
-  const newCounterValue = Math.max(0, (data.angularCounter || 0) - 1)
+  const newCounterValue = Math.max(0, readDatabase().angularCounter - 1)
   updateCounter('angularCounter', newCounterValue, res)
 })
 
 app.get('/othercounter/decrement', (req, res) => {
-  const data = readDatabase()
-  const newCounterValue = Math.max(0, (data.otherCounter || 0) - 1)
+  const newCounterValue = Math.max(0, readDatabase().otherCounter - 1)
   updateCounter('otherCounter', newCounterValue, res)
 })
 
