@@ -1,71 +1,147 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
+const sqlite3 = require('sqlite3').verbose()
+
 const app = express()
 const port = 3004
 
-let vueCounter = 0
-let reactCounter = 0
-let angularCounter = 0
-let otherCounter = 0
+const db = new sqlite3.Database('counters.db', (err) => {
+  if (err) {
+    console.error('Error connecting to the database:', err.message)
+  } else {
+    console.log('Connected to the SQLite database.')
+    db.run(`
+      CREATE TABLE IF NOT EXISTS counters (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        value INTEGER NOT NULL
+      )
+    `)
+  }
+})
 
-// Middleware to parse JSON bodies
+const incrementCounter = (counterName, callback) => {
+  db.serialize(() => {
+    db.get(
+      `SELECT value FROM counters WHERE name = ?`,
+      [counterName],
+      (err, row) => {
+        if (err) {
+          console.error('Error querying the database:', err.message)
+        } else {
+          let value = row ? row.value : 0
+          value++
+          db.run(
+            `INSERT OR REPLACE INTO counters (name, value) VALUES (?, ?)`,
+            [counterName, value],
+            (err) => {
+              if (err) {
+                console.error('Error updating the counter:', err.message)
+              } else {
+                callback(value)
+              }
+            }
+          )
+        }
+      }
+    )
+  })
+}
+
+// Function to decrement the counter in the database
+const decrementCounter = (counterName, callback) => {
+  db.serialize(() => {
+    db.get(
+      `SELECT value FROM counters WHERE name = ?`,
+      [counterName],
+      (err, row) => {
+        if (err) {
+          console.error('Error querying the database:', err.message)
+        } else {
+          let value = row ? row.value : 0
+          if (value > 0) {
+            value--
+          }
+          db.run(
+            `INSERT OR REPLACE INTO counters (name, value) VALUES (?, ?)`,
+            [counterName, value],
+            (err) => {
+              if (err) {
+                console.error('Error updating the counter:', err.message)
+              } else {
+                callback(value)
+              }
+            }
+          )
+        }
+      }
+    )
+  })
+}
+
 app.use(cookieParser())
 app.use(cors())
 app.use(express.json())
 
-// Route for incrementing the counter
 app.get('/vuecounter/increment', (req, res) => {
-  vueCounter++
-  res.json({ vueCounter })
+  incrementCounter('vueCounter', (value) => {
+    res.json({ vueCounter: value })
+  })
 })
 
 app.get('/reactcounter/increment', (req, res) => {
-  reactCounter++
-  res.json({ reactCounter })
+  incrementCounter('reactCounter', (value) => {
+    res.json({ reactCounter: value })
+  })
 })
 
 app.get('/angularcounter/increment', (req, res) => {
-  angularCounter++
-  res.json({ angularCounter })
+  incrementCounter('angularCounter', (value) => {
+    res.json({ angularCounter: value })
+  })
 })
 
 app.get('/othercounter/increment', (req, res) => {
-  otherCounter++
-  res.json({ otherCounter })
+  incrementCounter('otherCounter', (value) => {
+    res.json({ otherCounter: value })
+  })
 })
 
-// Route for decrementing the counter
 app.get('/vuecounter/decrement', (req, res) => {
-  if (vueCounter > 0) {
-    vueCounter--
-  }
-  res.json({ vueCounter })
+  decrementCounter('vueCounter', (value) => {
+    res.json({ vueCounter: value })
+  })
 })
 
 app.get('/reactcounter/decrement', (req, res) => {
-  if (reactCounter > 0) {
-    reactCounter--
-  }
-  res.json({ reactCounter })
+  decrementCounter('reactCounter', (value) => {
+    res.json({ reactCounter: value })
+  })
 })
 
 app.get('/angularcounter/decrement', (req, res) => {
-  if (angularCounter > 0) {
-    angularCounter--
-  }
-  res.json({ angularCounter })
+  decrementCounter('angularCounter', (value) => {
+    res.json({ angularCounter: value })
+  })
 })
 
 app.get('/othercounter/decrement', (req, res) => {
-  if (otherCounter > 0) {
-    otherCounter--
-  }
-  res.json({ otherCounter })
+  decrementCounter('otherCounter', (value) => {
+    res.json({ otherCounter: value })
+  })
 })
 
 app.get('/count/all', (req, res) => {
-  res.json({ vueCounter, reactCounter, angularCounter, otherCounter })
+  db.all('SELECT name, value FROM counters', (err, rows) => {
+    if (err) {
+      console.error('Error querying the database:', err.message)
+    } else {
+      const counters = {}
+      rows.forEach((row) => (counters[row.name] = row.value))
+      res.json(counters)
+    }
+  })
 })
 
 app.get('/set-cookie', (req, res) => {
