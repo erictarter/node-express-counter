@@ -5,8 +5,14 @@ const admin = require('firebase-admin')
 const app = express()
 const port = 3004
 
+const serviceAccountPath = path.resolve(
+  __dirname,
+  'private',
+  'poll-counter-9716a-firebase-adminsdk-cslmx-6931824643.json'
+)
+
 // Initialize Firebase Admin SDK with your service account key
-const serviceAccount = require('../../../private/poll-counter-9716a-firebase-adminsdk-cslmx-6931824643.json')
+const serviceAccount = require(serviceAccountPath)
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
