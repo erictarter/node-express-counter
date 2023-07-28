@@ -1,7 +1,7 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
-const { Database } = require('better-sqlite3')
+const Database = require('better-sqlite3')
 
 const app = express()
 const port = 3004
