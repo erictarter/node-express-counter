@@ -1,17 +1,17 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
-const sqlite3 = require('sqlite3').verbose()
+const { Database } = require('better-sqlite3')
 
 const app = express()
 const port = 3004
 
-const db = new sqlite3.Database('counters.db', (err) => {
+const db = new Database('counters.db', (err) => {
   if (err) {
     console.error('Error connecting to the database:', err.message)
   } else {
     console.log('Connected to the SQLite database.')
-    db.run(`
+    db.exec(`
       CREATE TABLE IF NOT EXISTS counters (
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
@@ -22,62 +22,33 @@ const db = new sqlite3.Database('counters.db', (err) => {
 })
 
 const incrementCounter = (counterName, callback) => {
-  db.serialize(() => {
-    db.get(
-      `SELECT value FROM counters WHERE name = ?`,
-      [counterName],
-      (err, row) => {
-        if (err) {
-          console.error('Error querying the database:', err.message)
-        } else {
-          let value = row ? row.value : 0
-          value++
-          db.run(
-            `INSERT OR REPLACE INTO counters (name, value) VALUES (?, ?)`,
-            [counterName, value],
-            (err) => {
-              if (err) {
-                console.error('Error updating the counter:', err.message)
-              } else {
-                callback(value)
-              }
-            }
-          )
-        }
-      }
-    )
-  })
+  const stmt = db.prepare('SELECT value FROM counters WHERE name = ?')
+  const row = stmt.get(counterName)
+  let value = row ? row.value : 0
+  value++
+
+  const updateStmt = db.prepare(
+    'INSERT OR REPLACE INTO counters (name, value) VALUES (?, ?)'
+  )
+  updateStmt.run(counterName, value)
+
+  callback(value)
 }
 
-// Function to decrement the counter in the database
 const decrementCounter = (counterName, callback) => {
-  db.serialize(() => {
-    db.get(
-      `SELECT value FROM counters WHERE name = ?`,
-      [counterName],
-      (err, row) => {
-        if (err) {
-          console.error('Error querying the database:', err.message)
-        } else {
-          let value = row ? row.value : 0
-          if (value > 0) {
-            value--
-          }
-          db.run(
-            `INSERT OR REPLACE INTO counters (name, value) VALUES (?, ?)`,
-            [counterName, value],
-            (err) => {
-              if (err) {
-                console.error('Error updating the counter:', err.message)
-              } else {
-                callback(value)
-              }
-            }
-          )
-        }
-      }
-    )
-  })
+  const stmt = db.prepare('SELECT value FROM counters WHERE name = ?')
+  const row = stmt.get(counterName)
+  let value = row ? row.value : 0
+  if (value > 0) {
+    value--
+  }
+
+  const updateStmt = db.prepare(
+    'INSERT OR REPLACE INTO counters (name, value) VALUES (?, ?)'
+  )
+  updateStmt.run(counterName, value)
+
+  callback(value)
 }
 
 app.use(cookieParser())
@@ -133,15 +104,13 @@ app.get('/othercounter/decrement', (req, res) => {
 })
 
 app.get('/count/all', (req, res) => {
-  db.all('SELECT name, value FROM counters', (err, rows) => {
-    if (err) {
-      console.error('Error querying the database:', err.message)
-    } else {
-      const counters = {}
-      rows.forEach((row) => (counters[row.name] = row.value))
-      res.json(counters)
-    }
-  })
+  const stmt = db.prepare('SELECT name, value FROM counters')
+  const rows = stmt.all()
+
+  const counters = {}
+  rows.forEach((row) => (counters[row.name] = row.value))
+
+  res.json(counters)
 })
 
 app.get('/set-cookie', (req, res) => {
