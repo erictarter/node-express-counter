@@ -2,9 +2,11 @@ const express = require('express')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const admin = require('firebase-admin')
+const path = require('path') // Add this line to import the 'path' module
 const app = express()
 const port = 3004
 
+// Resolve the absolute path to the service account key JSON file
 const serviceAccountPath = path.resolve(
   __dirname,
   'private',
