@@ -6,20 +6,7 @@ const Database = require('better-sqlite3')
 const app = express()
 const port = 3004
 
-const db = new Database('counters.db', (err) => {
-  if (err) {
-    console.error('Error connecting to the database:', err.message)
-  } else {
-    console.log('Connected to the SQLite database.')
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS counters (
-        id INTEGER PRIMARY KEY,
-        name TEXT NOT NULL,
-        value INTEGER NOT NULL
-      )
-    `)
-  }
-})
+const db = new Database('counters.db', {})
 
 const incrementCounter = (counterName, callback) => {
   const stmt = db.prepare('SELECT value FROM counters WHERE name = ?')
