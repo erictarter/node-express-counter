@@ -7,9 +7,10 @@ const port = 3004
 
 // Initialize Firebase Admin SDK with your service account key
 const serviceAccount = require('C:/private/poll-counter-9716a-firebase-adminsdk-cslmx-6931824643.json')
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://poll-counter-9716a-default-rtdb.firebaseio.com/'
+  databaseURL: 'https://your-firebase-project-id.firebaseio.com'
 })
 
 // Reference to the Firebase Realtime Database
