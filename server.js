@@ -1,97 +1,147 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
-const fs = require('fs')
+const admin = require('firebase-admin')
 const app = express()
 const port = 3004
 
-let counterData = {
-  vueCounter: 0,
-  reactCounter: 0,
-  angularCounter: 0,
-  otherCounter: 0
-}
-
-const saveCounterDataToFile = () => {
-  fs.writeFile('counterData.json', JSON.stringify(counterData), (err) => {
-    if (err) {
-      console.error('Error saving counter data:', err)
-    }
-  })
-}
-
-fs.readFile('counterData.json', (err, data) => {
-  if (!err) {
-    try {
-      counterData = JSON.parse(data)
-    } catch (e) {
-      console.error('Error parsing counter data:', e)
-    }
-  }
+// Initialize Firebase Admin SDK with your service account key
+const serviceAccount = require('C:/private/poll-counter-9716a-firebase-adminsdk-cslmx-6931824643.json')
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://poll-counter-9716a-default-rtdb.firebaseio.com/'
 })
 
+// Reference to the Firebase Realtime Database
+const db = admin.database()
+const counterRef = db.ref('counters')
+
+// Middleware to parse JSON bodies
 app.use(cookieParser())
 app.use(cors())
 app.use(express.json())
 
-app.get('/vuecounter/increment', (req, res) => {
-  counterData.vueCounter++
-  saveCounterDataToFile()
-  res.json({ vueCounter: counterData.vueCounter })
-})
-
-app.get('/reactcounter/increment', (req, res) => {
-  counterData.reactCounter++
-  saveCounterDataToFile()
-  res.json({ reactCounter: counterData.reactCounter })
-})
-
-app.get('/angularcounter/increment', (req, res) => {
-  counterData.angularCounter++
-  saveCounterDataToFile()
-  res.json({ angularCounter: counterData.angularCounter })
-})
-
-app.get('/othercounter/increment', (req, res) => {
-  counterData.otherCounter++
-  saveCounterDataToFile()
-  res.json({ otherCounter: counterData.otherCounter })
-})
-
-app.get('/vuecounter/decrement', (req, res) => {
-  if (counterData.vueCounter > 0) {
-    counterData.vueCounter--
-    saveCounterDataToFile()
+app.get('/vuecounter/increment', async (req, res) => {
+  try {
+    const snapshot = await counterRef.once('value')
+    const counters = snapshot.val() || {}
+    counters.vueCounter = (counters.vueCounter || 0) + 1
+    await counterRef.set(counters)
+    res.json({ vueCounter: counters.vueCounter })
+  } catch (err) {
+    console.error('Error incrementing Vue counter:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
-  res.json({ vueCounter: counterData.vueCounter })
 })
 
-app.get('/reactcounter/decrement', (req, res) => {
-  if (counterData.reactCounter > 0) {
-    counterData.reactCounter--
-    saveCounterDataToFile()
+app.get('/reactcounter/increment', async (req, res) => {
+  try {
+    const snapshot = await counterRef.once('value')
+    const counters = snapshot.val() || {}
+    counters.reactCounter = (counters.reactCounter || 0) + 1
+    await counterRef.set(counters)
+    res.json({ reactCounter: counters.reactCounter })
+  } catch (err) {
+    console.error('Error incrementing React counter:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
-  res.json({ reactCounter: counterData.reactCounter })
 })
 
-app.get('/angularcounter/decrement', (req, res) => {
-  if (counterData.angularCounter > 0) {
-    counterData.angularCounter--
-    saveCounterDataToFile()
+app.get('/angularcounter/increment', async (req, res) => {
+  try {
+    const snapshot = await counterRef.once('value')
+    const counters = snapshot.val() || {}
+    counters.angularCounter = (counters.angularCounter || 0) + 1
+    await counterRef.set(counters)
+    res.json({ angularCounter: counters.angularCounter })
+  } catch (err) {
+    console.error('Error incrementing Angular counter:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
-  res.json({ angularCounter: counterData.angularCounter })
 })
 
-app.get('/othercounter/decrement', (req, res) => {
-  if (counterData.otherCounter > 0) {
-    counterData.otherCounter--
-    saveCounterDataToFile()
+app.get('/othercounter/increment', async (req, res) => {
+  try {
+    const snapshot = await counterRef.once('value')
+    const counters = snapshot.val() || {}
+    counters.otherCounter = (counters.otherCounter || 0) + 1
+    await counterRef.set(counters)
+    res.json({ otherCounter: counters.otherCounter })
+  } catch (err) {
+    console.error('Error incrementing Other counter:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
-  res.json({ otherCounter: counterData.otherCounter })
 })
 
-app.get('/count/all', (req, res) => {
-  res.json(counterData)
+app.get('/vuecounter/decrement', async (req, res) => {
+  try {
+    const snapshot = await counterRef.once('value')
+    const counters = snapshot.val() || {}
+    if (counters.vueCounter > 0) {
+      counters.vueCounter--
+      await counterRef.set(counters)
+    }
+    res.json({ vueCounter: counters.vueCounter })
+  } catch (err) {
+    console.error('Error decrementing Vue counter:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+app.get('/reactcounter/decrement', async (req, res) => {
+  try {
+    const snapshot = await counterRef.once('value')
+    const counters = snapshot.val() || {}
+    if (counters.reactCounter > 0) {
+      counters.reactCounter--
+      await counterRef.set(counters)
+    }
+    res.json({ reactCounter: counters.reactCounter })
+  } catch (err) {
+    console.error('Error decrementing React counter:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+app.get('/angularcounter/decrement', async (req, res) => {
+  try {
+    const snapshot = await counterRef.once('value')
+    const counters = snapshot.val() || {}
+    if (counters.angularCounter > 0) {
+      counters.angularCounter--
+      await counterRef.set(counters)
+    }
+    res.json({ angularCounter: counters.angularCounter })
+  } catch (err) {
+    console.error('Error decrementing Angular counter:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+app.get('/othercounter/decrement', async (req, res) => {
+  try {
+    const snapshot = await counterRef.once('value')
+    const counters = snapshot.val() || {}
+    if (counters.otherCounter > 0) {
+      counters.otherCounter--
+      await counterRef.set(counters)
+    }
+    res.json({ otherCounter: counters.otherCounter })
+  } catch (err) {
+    console.error('Error decrementing Other counter:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+app.get('/count/all', async (req, res) => {
+  try {
+    const snapshot = await counterRef.once('value')
+    const counters = snapshot.val() || {}
+    res.json(counters)
+  } catch (err) {
+    console.error('Error fetching counter data:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
 })
 
 app.get('/set-cookie', (req, res) => {
@@ -106,6 +156,7 @@ app.get('/', (req, res) => {
   res.send('Hello from Eric!')
 })
 
+// Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`)
 })
