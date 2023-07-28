@@ -6,7 +6,7 @@ const app = express()
 const port = 3004
 
 // Initialize Firebase Admin SDK with your service account key
-const serviceAccount = require('C:/private/poll-counter-9716a-firebase-adminsdk-cslmx-6931824643.json')
+const serviceAccount = require('../../../private/poll-counter-9716a-firebase-adminsdk-cslmx-6931824643.json')
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
